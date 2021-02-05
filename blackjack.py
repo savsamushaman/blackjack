@@ -4,16 +4,16 @@ import random
 class BasePlayer:
     def __init__(self):
         self.chips = 500
-        self.current_score = {}
+        self.current_score_raw = {}
 
     def clear_score(self):
-        self.current_score = {}
+        self.current_score_raw = {}
 
     def add_to_score(self, card):
-        if card in self.current_score:
-            self.current_score[card] += 1
+        if card in self.current_score_raw:
+            self.current_score_raw[card] += 1
         else:
-            self.current_score[card] = 1
+            self.current_score_raw[card] = 1
 
     def win(self, amount):
         self.chips += amount
@@ -22,23 +22,24 @@ class BasePlayer:
         self.chips -= amount
         return amount
 
-    def calculate_score(self):
+    @property
+    def current_score(self):
         points = 0
 
-        for card in self.current_score.keys():
+        for card in self.current_score_raw.keys():
             if card in ['J', 'Q', 'K']:
-                points += 10 * self.current_score[card]
+                points += 10 * self.current_score_raw[card]
             elif card == 'A':
-                points += 11 * self.current_score[card]
+                points += 11 * self.current_score_raw[card]
             else:
-                points += int(card) * self.current_score[card]
+                points += int(card) * self.current_score_raw[card]
 
         return points
 
 
 class Player(BasePlayer):
 
-    def __init__(self, name):
+    def __init__(self, name='Unknown Player'):
         super().__init__()
         self.name = name
 
@@ -63,7 +64,7 @@ class Dealer(BasePlayer):
 
 
 def conclude_game(dealer_instance):
-    while dealer_instance.calculate_score() < 17:
+    while dealer_instance.current_score < 17:
         card = dealer_instance.deal_card()
         dealer_instance.add_to_score(card)
-    return dealer_instance.calculate_score()
+    return dealer_instance.current_score
